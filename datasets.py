@@ -3,6 +3,9 @@ import scipy.sparse as sparse
 import pickle
 from collections import defaultdict
 
+my_graph = np.load("my_graph.npy")
+
+
 
 print("Datasets Available")
 print("-" * 20)
@@ -42,8 +45,9 @@ def get_pickle_dataset(filename):
     return pickle.load(open(filename, 'rb'))
 
 datasets = {
-    'binary_tree': binary_tree,
-    'quad_tree':  quad_tree
+    "binary_tree": binary_tree,
+    "quad_tree": quad_tree,
+    "my_graph": my_graph,
 }
 
 print(' '.join(datasets.keys()))

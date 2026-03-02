@@ -102,7 +102,7 @@ if __name__ == "__main__":
         "-logdir", help="What folder to put logs in", default="runs", type=str
     )
     parser.add_argument(
-        "-save_step", help="Save at what multiple of epochs?", default=100, type=int
+        "-save_step", help="Save at what multiple of epochs?", default=5, type=int
     )
     parser.add_argument(
         "-savedir", help="What folder to put checkpoints in", default="ckpt", type=str
@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-device",
-        default='cuda'
+        default='cpu'
     )
     args = parser.parse_args()
     # ----------------------------------- get the correct matrix
@@ -153,17 +153,25 @@ if __name__ == "__main__":
         else:
             paths = [args.ckpt]
         paths = list(sorted(paths))
-        edges = [
-            tuple(edge)
-            for edge in set(
-                [
-                    frozenset((a + 1, b + 1))
-                    for a, row in enumerate(pairwise > 0)
-                    for b, is_non_zero in enumerate(row)
-                    if is_non_zero
-                ]
-            )
-        ]
+        
+        edges = []
+        seen = set()
+
+        for a, row in enumerate(pairwise > 0):
+            for b, is_non_zero in enumerate(row):
+                if not is_non_zero:
+                    continue
+                if a == b:
+                    continue  # skip self-loops for plotting lines
+                u, v = a + 1, b + 1
+                key = (u, v) if u < v else (v, u)  # undirected de-dup
+                if key in seen:
+                    continue
+                seen.add(key)
+                edges.append(key)
+
+        edges = np.array(edges, dtype=np.int64)
+
         print(len(edges), "nodes")
         internal_nodes = set(
             node
